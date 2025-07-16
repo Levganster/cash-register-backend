@@ -1,6 +1,8 @@
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { UsersRepository } from './users.repository';
 import { UserCreateDto } from './dto/user-create.dto';
+import { UserUpdateDto } from './dto/user-update.dto';
+import { UserSearchDto } from './dto/user.search.dto';
 import { I18nService } from 'nestjs-i18n';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { User } from '@app/common';
@@ -63,5 +65,31 @@ export class UsersService {
     if (!exists) {
       throw new NotFoundException(this.i18n.t('errors.user.notFound'));
     }
+  }
+
+  async search(dto: UserSearchDto): Promise<User[]> {
+    return this.usersRepository.search(dto);
+  }
+
+  async update(id: string, dto: UserUpdateDto): Promise<User> {
+    await this.ensureExistsById(id);
+
+    const user = await this.usersRepository.update(id, dto);
+
+    await this.cacheManager.del(`user:${id}`);
+    await this.cacheManager.del(`user:${user.tgId}`);
+
+    return user;
+  }
+
+  async delete(id: string): Promise<User> {
+    await this.ensureExistsById(id);
+
+    const user = await this.usersRepository.delete(id);
+
+    await this.cacheManager.del(`user:${id}`);
+    await this.cacheManager.del(`user:${user.tgId}`);
+
+    return user;
   }
 }

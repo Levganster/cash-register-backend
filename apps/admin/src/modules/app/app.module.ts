@@ -7,6 +7,7 @@ import config from '../../config/config';
 import { TokenModule } from '@app/token';
 import { RoleModule } from '../role/role.module';
 import { PermissionsModule } from '../permissions/permissions.module';
+import { UsersModule } from '../users/users.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { UsersModule as LibUsersModule } from '@app/users';
 import { PermissionModule as LibPermissionModule } from '@app/permissions';
@@ -43,6 +44,7 @@ import { JwtAuthGuard, PermissionGuard } from '@app/common';
     TokenModule,
     RoleModule,
     PermissionsModule,
+    UsersModule,
     LibUsersModule,
     LibPermissionModule,
   ],
