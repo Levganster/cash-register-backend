@@ -4,7 +4,38 @@ import { BaseRoleEnum } from '../../libs/common/src/constants/base-roles.enum';
 
 export async function seedRole(prisma: PrismaClient) {
   await createRole(prisma, BaseRoleEnum.Admin, null);
-  await createRole(prisma, BaseRoleEnum.User, [PermissionEnum.UserGet]);
+  await createRole(prisma, BaseRoleEnum.User, [
+    PermissionEnum.UserGet,
+    PermissionEnum.BalanceGet,
+    PermissionEnum.CurrencyGet,
+    PermissionEnum.CurrencyBalanceGet,
+    PermissionEnum.TransactionGet,
+  ]);
+  await createRole(prisma, BaseRoleEnum.Manager, [
+    PermissionEnum.BalanceGet,
+    PermissionEnum.BalanceCreate,
+    PermissionEnum.BalanceUpdate,
+    PermissionEnum.BalanceDelete,
+    PermissionEnum.BalanceSearch,
+
+    PermissionEnum.CurrencyGet,
+    PermissionEnum.CurrencyCreate,
+    PermissionEnum.CurrencyUpdate,
+    PermissionEnum.CurrencyDelete,
+    PermissionEnum.CurrencySearch,
+
+    PermissionEnum.CurrencyBalanceGet,
+    PermissionEnum.CurrencyBalanceCreate,
+    PermissionEnum.CurrencyBalanceUpdate,
+    PermissionEnum.CurrencyBalanceDelete,
+    PermissionEnum.CurrencyBalanceSearch,
+
+    PermissionEnum.TransactionGet,
+    PermissionEnum.TransactionCreate,
+    PermissionEnum.TransactionUpdate,
+    PermissionEnum.TransactionDelete,
+    PermissionEnum.TransactionSearch,
+  ]);
 }
 
 async function createRole(

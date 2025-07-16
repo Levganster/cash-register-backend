@@ -1,21 +1,9 @@
-import { ApiProperty, OmitType, PartialType } from '@nestjs/swagger';
-import { UserBaseDto } from './user-base.dto';
+import { ApiProperty } from '@nestjs/swagger';
 import { SearchBaseDto } from '@app/common/base/search.dto';
 import { Type } from 'class-transformer';
-import { IsOptional, IsString, ValidateNested } from 'class-validator';
+import { ValidateNested } from 'class-validator';
 
-export class UserFiltersDto extends PartialType(
-  OmitType(UserBaseDto, ['password']),
-) {
-  @ApiProperty()
-  @IsString()
-  email?: string;
-
-  @ApiProperty()
-  @IsString()
-  @IsOptional()
-  organizationId?: string;
-}
+export class UserFiltersDto {}
 
 export class UserSortDto {}
 

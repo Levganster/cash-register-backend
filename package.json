@@ -117,7 +117,11 @@
       "^@app/token(|/.*)$": "<rootDir>/libs/token/src/$1",
       "^@app/prisma(|/.*)$": "<rootDir>/libs/prisma/src/$1",
       "^@app/sessions(|/.*)$": "<rootDir>/libs/sessions/src/$1",
-      "^@app/media(|/.*)$": "<rootDir>/libs/media/src/$1"
+      "^@app/media(|/.*)$": "<rootDir>/libs/media/src/$1",
+      "^@app/balance(|/.*)$": "<rootDir>/libs/balance/src/$1",
+      "^@app/currency(|/.*)$": "<rootDir>/libs/currency/src/$1",
+      "^@app/currency-balance(|/.*)$": "<rootDir>/libs/currency-balance/src/$1",
+      "^@app/transaction(|/.*)$": "<rootDir>/libs/transaction/src/$1"
     }
   }
 }

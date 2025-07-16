@@ -1,18 +1,11 @@
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { I18nService } from 'nestjs-i18n';
 import { SignUpDto } from './dto/sign-up.dto';
 import { SignInDto } from './dto/sign-in.dto';
 import { TokenService } from '@app/token';
 import { UsersService } from '@app/users';
-import { PasswordService } from '@app/password';
 import { Response } from 'express';
 import { SessionsService } from '@app/sessions';
-import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
@@ -21,10 +14,8 @@ export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly tokenService: TokenService,
-    private readonly passwordService: PasswordService,
     private readonly i18n: I18nService,
     private readonly sessionsService: SessionsService,
-    private readonly configService: ConfigService,
   ) {}
 
   private async generateTokenPair(userId: string, roleId: string) {
@@ -50,27 +41,17 @@ export class AuthService {
 
   async signUp(dto: SignUpDto) {
     const user = await this.usersService.create(dto);
-    this.logger.log(`Пользователь ${dto.email} зарегистрировался`);
+    this.logger.log(`Пользователь ${dto.tgId} зарегистрировался`);
     return this.generateTokenPair(user.id, user.roleId);
   }
 
   async signIn(dto: SignInDto) {
-    const user = await this.usersService.findOneByEmail(dto.email);
-
-    if (
-      !(await this.passwordService.comparePassword({
-        password: dto.password,
-        hashedPassword: user.password,
-      }))
-    ) {
-      this.logger.warn(`Неудачная попытка входа для ${dto.email}`);
-      throw new UnauthorizedException(this.i18n.t('errors.unauthorized'));
-    }
+    const user = await this.usersService.findOneByTgId(dto.tgId);
 
     const tokens = await this.generateTokenPair(user.id, user.roleId);
     await this.sessionsService.create(user.id, tokens.refreshToken);
 
-    this.logger.log(`Пользователь ${dto.email} успешно вошел в систему`);
+    this.logger.log(`Пользователь ${dto.tgId} успешно вошел в систему`);
     return tokens;
   }
 

@@ -10,7 +10,10 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { UsersModule as LibUsersModule } from '@app/users';
 import { PermissionModule as LibPermissionModule } from '@app/permissions';
 import { S3Module } from 'nestjs-s3';
-import { MediaModule } from '../media/media.module';
+import { BalanceModule } from '../balance/balance.module';
+import { CurrencyModule } from '../currency/currency.module';
+import { CurrencyBalanceModule } from '../currency-balance/currency-balance.module';
+import { TransactionModule } from '../transaction/transaction.module';
 
 @Module({
   imports: [
@@ -58,7 +61,10 @@ import { MediaModule } from '../media/media.module';
     UsersModule,
     LibUsersModule,
     LibPermissionModule,
-    MediaModule,
+    BalanceModule,
+    CurrencyModule,
+    CurrencyBalanceModule,
+    TransactionModule,
   ],
 })
 export class AppModule implements NestModule {

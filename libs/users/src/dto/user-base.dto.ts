@@ -1,14 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
-import { IsEmail, IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class UserBaseDto {
-  @ApiProperty({ default: 'string@gmail.com' })
-  @Transform(({ value }) => value.toLowerCase())
-  @IsEmail()
-  email: string;
-
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Telegram ID',
+    example: '1234567890',
+  })
   @IsString()
-  password: string;
+  @IsNotEmpty()
+  tgId: string;
 }

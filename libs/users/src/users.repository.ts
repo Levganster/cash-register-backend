@@ -9,16 +9,16 @@ import { User } from '@app/common';
 export class UsersRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findOneById(id: string): Promise<User> {
+  async findOneByTgId(tgId: string): Promise<User> {
     return this.prisma.user.findUnique({
-      where: { id },
+      where: { tgId },
       include: USER_INCLUDE,
     });
   }
 
-  async findOneByEmail(email: string): Promise<User> {
+  async findOneById(id: string): Promise<User> {
     return this.prisma.user.findUnique({
-      where: { email },
+      where: { id },
       include: USER_INCLUDE,
     });
   }
@@ -43,18 +43,6 @@ export class UsersRepository {
         SELECT 1
         FROM users
         WHERE id = ${id}
-      ) as exists
-    `;
-
-    return Boolean(result[0].exists);
-  }
-
-  async existsByEmail(email: string): Promise<boolean> {
-    const result = await this.prisma.$queryRaw`
-      SELECT EXISTS (
-        SELECT 1
-        FROM users
-        WHERE email = ${email}
       ) as exists
     `;
 

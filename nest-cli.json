@@ -108,6 +108,42 @@
       "compilerOptions": {
         "tsConfigPath": "libs/media/tsconfig.lib.json"
       }
+    },
+    "balance": {
+      "type": "library",
+      "root": "libs/balance",
+      "entryFile": "index",
+      "sourceRoot": "libs/balance/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/balance/tsconfig.lib.json"
+      }
+    },
+    "currency": {
+      "type": "library",
+      "root": "libs/currency",
+      "entryFile": "index",
+      "sourceRoot": "libs/currency/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/currency/tsconfig.lib.json"
+      }
+    },
+    "currency-balance": {
+      "type": "library",
+      "root": "libs/currency-balance",
+      "entryFile": "index",
+      "sourceRoot": "libs/currency-balance/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/currency-balance/tsconfig.lib.json"
+      }
+    },
+    "transaction": {
+      "type": "library",
+      "root": "libs/transaction",
+      "entryFile": "index",
+      "sourceRoot": "libs/transaction/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/transaction/tsconfig.lib.json"
+      }
     }
   }
 }

@@ -71,6 +71,30 @@
       ],
       "@app/media/*": [
         "libs/media/src/*"
+      ],
+      "@app/balance": [
+        "libs/balance/src"
+      ],
+      "@app/balance/*": [
+        "libs/balance/src/*"
+      ],
+      "@app/currency": [
+        "libs/currency/src"
+      ],
+      "@app/currency/*": [
+        "libs/currency/src/*"
+      ],
+      "@app/currency-balance": [
+        "libs/currency-balance/src"
+      ],
+      "@app/currency-balance/*": [
+        "libs/currency-balance/src/*"
+      ],
+      "@app/transaction": [
+        "libs/transaction/src"
+      ],
+      "@app/transaction/*": [
+        "libs/transaction/src/*"
       ]
     }
   }

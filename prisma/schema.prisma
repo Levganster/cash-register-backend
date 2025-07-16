@@ -8,34 +8,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum MediaType {
-  AVATAR
-}
-
-model Media {
-  id        String    @id @default(uuid())
-  url       String
-  type      MediaType
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at")
-  users     User[]
-
-  @@map("medias")
-}
-
 model User {
   id        String    @id @default(uuid())
-  email     String    @unique
-  password  String
+  tgId      String    @unique
   roleId    String    @map("role_id")
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @default(now()) @updatedAt @map("updated_at")
   role      Role      @relation(fields: [roleId], references: [id], onDelete: NoAction)
   sessions  Session[]
-  avatar    Media?    @relation(fields: [avatarId], references: [id], onDelete: SetNull)
-  avatarId  String?
-
-  @@index([email])
   @@map("users")
 }
 
@@ -84,4 +64,67 @@ model RolePermission {
 
   @@id([roleId, permissionId])
   @@map("role_permissions")
+}
+
+model Balance {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  currencyBalances CurrencyBalance[]
+  transactions Transaction[]
+
+  @@map("balances")
+}
+
+model Currency {
+  id        String   @id @default(uuid())
+  code      String   @unique
+  name      String
+  symbol    String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  currencyBalances CurrencyBalance[]
+  transactions Transaction[]
+
+  @@map("currencies")
+}
+
+model CurrencyBalance {
+  id         String   @id @default(uuid())
+  balanceId  String   @map("balance_id")
+  currencyId String   @map("currency_id")
+  amount     Int      @default(0)
+  balance    Balance  @relation(fields: [balanceId], references: [id], onDelete: Cascade)
+  currency   Currency @relation(fields: [currencyId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@unique([balanceId, currencyId])
+  @@index([balanceId])
+  @@index([currencyId])
+  @@map("currency_balances")
+}
+
+model Transaction {
+  id         String   @id @default(uuid())
+  type       TransactionType
+  amount     Int
+  balanceId  String   @map("balance_id")
+  currencyId String   @map("currency_id")
+  balance    Balance  @relation(fields: [balanceId], references: [id], onDelete: Cascade)
+  currency   Currency @relation(fields: [currencyId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at")
+  
+  @@index([balanceId])
+  @@index([currencyId])
+  @@map("transactions")
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+  TRANSFER
+  SETTLEMENT
 }
