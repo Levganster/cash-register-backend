@@ -93,6 +93,12 @@ export class CurrencyRepository {
     });
   }
 
+  async count(dto: CurrencySearchDto) {
+    return this.prisma.currency.count({
+      where: mapSearch(dto.filters || {}),
+    });
+  }
+
   async existsById(id: string) {
     const result = await this.prisma.$queryRaw`
       SELECT EXISTS (

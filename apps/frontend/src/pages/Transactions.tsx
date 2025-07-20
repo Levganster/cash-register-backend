@@ -7,47 +7,75 @@ import {
   ArrowUpIcon,
   ArrowDownIcon,
   ArrowRightIcon,
+  PencilIcon,
+  TrashIcon,
 } from '@heroicons/react/24/outline';
 import { apiClient } from '../lib/api';
-import type { Transaction, Currency } from '../types';
+import type { Transaction, Currency, Balance } from '../types';
 
 interface TransactionFormData {
-  type: 'INCOME' | 'EXPENSE' | 'TRANSFER';
+  type: 'INCOME' | 'EXPENSE' | 'TRANSFER' | 'SETTLEMENT';
   amount: number;
-  description: string;
+  balanceId: string;
   currencyId: string;
 }
 
 interface FilterState {
-  type?: 'INCOME' | 'EXPENSE' | 'TRANSFER';
+  type?: 'INCOME' | 'EXPENSE' | 'TRANSFER' | 'SETTLEMENT';
+  balanceId?: string;
   currencyId?: string;
-  search?: string;
 }
 
 export const Transactions = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingTransaction, setEditingTransaction] =
+    useState<Transaction | null>(null);
   const [filters, setFilters] = useState<FilterState>({});
   const [showFilters, setShowFilters] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: transactions, isLoading } = useQuery({
-    queryKey: ['my-transactions', filters],
-    queryFn: () => apiClient.getMyTransactions(filters),
+  const { data: transactionsResponse, isLoading } = useQuery({
+    queryKey: ['transactions', filters],
+    queryFn: () =>
+      apiClient.getTransactions({
+        filters,
+        pagination: { page: 1, count: 50 },
+      }),
   });
 
-  const { data: currencies } = useQuery({
+  const { data: currenciesResponse } = useQuery({
     queryKey: ['currencies'],
     queryFn: () => apiClient.getCurrencies(),
+  });
+
+  const { data: balancesResponse } = useQuery({
+    queryKey: ['balances'],
+    queryFn: () => apiClient.getBalances(),
   });
 
   const createMutation = useMutation({
     mutationFn: (data: TransactionFormData) =>
       apiClient.createTransaction(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['my-transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['transactions'] });
       queryClient.invalidateQueries({ queryKey: ['my-balances'] });
       setIsCreateModalOpen(false);
+      reset();
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: Partial<TransactionFormData>;
+    }) => apiClient.updateTransaction(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['my-balances'] });
+      setEditingTransaction(null);
       reset();
     },
   });
@@ -55,8 +83,7 @@ export const Transactions = () => {
   const deleteMutation = useMutation({
     mutationFn: (id: string) => apiClient.deleteTransaction(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['my-transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['transactions'] });
       queryClient.invalidateQueries({ queryKey: ['my-balances'] });
     },
   });
@@ -65,11 +92,33 @@ export const Transactions = () => {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<TransactionFormData>();
 
   const onSubmit = (data: TransactionFormData) => {
-    createMutation.mutate(data);
+    const transactionData = {
+      ...data,
+      amount: Math.round(data.amount * 100), // Конвертируем в копейки
+    };
+
+    if (editingTransaction) {
+      updateMutation.mutate({
+        id: editingTransaction.id,
+        data: transactionData,
+      });
+    } else {
+      createMutation.mutate(transactionData);
+    }
+  };
+
+  const handleEdit = (transaction: Transaction) => {
+    setEditingTransaction(transaction);
+    setValue('type', transaction.type);
+    setValue('amount', transaction.amount / 100); // Конвертируем из копеек
+    setValue('balanceId', transaction.balanceId);
+    setValue('currencyId', transaction.currencyId);
+    setIsCreateModalOpen(true);
   };
 
   const handleDelete = (id: string) => {
@@ -78,20 +127,43 @@ export const Transactions = () => {
     }
   };
 
+  const closeModal = () => {
+    setIsCreateModalOpen(false);
+    setEditingTransaction(null);
+    reset();
+  };
+
   const getTransactionIcon = (type: string) => {
     switch (type) {
       case 'INCOME':
-        return <ArrowUpIcon className="h-5 w-5 text-success-600" />;
+        return <ArrowDownIcon className="h-5 w-5 text-green-600" />;
       case 'EXPENSE':
-        return <ArrowDownIcon className="h-5 w-5 text-danger-600" />;
+        return <ArrowUpIcon className="h-5 w-5 text-red-600" />;
       case 'TRANSFER':
-        return <ArrowRightIcon className="h-5 w-5 text-primary-600" />;
+        return <ArrowRightIcon className="h-5 w-5 text-blue-600" />;
+      case 'SETTLEMENT':
+        return <ArrowRightIcon className="h-5 w-5 text-purple-600" />;
       default:
         return <ArrowRightIcon className="h-5 w-5 text-gray-600" />;
     }
   };
 
-  const getTransactionTypeText = (type: string) => {
+  const getTransactionColor = (type: string) => {
+    switch (type) {
+      case 'INCOME':
+        return 'text-green-600';
+      case 'EXPENSE':
+        return 'text-red-600';
+      case 'TRANSFER':
+        return 'text-blue-600';
+      case 'SETTLEMENT':
+        return 'text-purple-600';
+      default:
+        return 'text-gray-600';
+    }
+  };
+
+  const getTransactionLabel = (type: string) => {
     switch (type) {
       case 'INCOME':
         return 'Доход';
@@ -99,21 +171,10 @@ export const Transactions = () => {
         return 'Расход';
       case 'TRANSFER':
         return 'Перевод';
+      case 'SETTLEMENT':
+        return 'Расчет';
       default:
         return type;
-    }
-  };
-
-  const getAmountColor = (type: string) => {
-    switch (type) {
-      case 'INCOME':
-        return 'text-success-600';
-      case 'EXPENSE':
-        return 'text-danger-600';
-      case 'TRANSFER':
-        return 'text-primary-600';
-      default:
-        return 'text-gray-600';
     }
   };
 
@@ -125,13 +186,18 @@ export const Transactions = () => {
     );
   }
 
+  const transactions = (transactionsResponse?.data?.data ||
+    []) as Transaction[];
+  const currencies = (currenciesResponse?.data?.data || []) as Currency[];
+  const balances = (balancesResponse?.data?.data || []) as Balance[];
+
   return (
     <div className="space-y-6">
       <div className="sm:flex sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Мои транзакции</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Транзакции</h1>
           <p className="mt-2 text-sm text-gray-600">
-            История всех ваших доходов, расходов и переводов
+            Управляйте доходами и расходами
           </p>
         </div>
         <div className="flex space-x-3">
@@ -152,13 +218,13 @@ export const Transactions = () => {
         </div>
       </div>
 
-      {/* Filters */}
+      {/* Фильтры */}
       {showFilters && (
-        <div className="card">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="bg-white p-4 rounded-lg shadow border">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Тип транзакции
+                Тип
               </label>
               <select
                 value={filters.type || ''}
@@ -168,9 +234,29 @@ export const Transactions = () => {
                 className="input"
               >
                 <option value="">Все типы</option>
-                <option value="INCOME">Доходы</option>
-                <option value="EXPENSE">Расходы</option>
-                <option value="TRANSFER">Переводы</option>
+                <option value="INCOME">Доход</option>
+                <option value="EXPENSE">Расход</option>
+                <option value="TRANSFER">Перевод</option>
+                <option value="SETTLEMENT">Расчет</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Баланс
+              </label>
+              <select
+                value={filters.balanceId || ''}
+                onChange={(e) =>
+                  setFilters({ ...filters, balanceId: e.target.value })
+                }
+                className="input"
+              >
+                <option value="">Все балансы</option>
+                {balances.map((balance) => (
+                  <option key={balance.id} value={balance.id}>
+                    {balance.name}
+                  </option>
+                ))}
               </select>
             </div>
             <div>
@@ -185,115 +271,20 @@ export const Transactions = () => {
                 className="input"
               >
                 <option value="">Все валюты</option>
-                {currencies?.data?.map((currency) => (
+                {currencies.map((currency) => (
                   <option key={currency.id} value={currency.id}>
                     {currency.code} - {currency.name}
                   </option>
                 ))}
               </select>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Поиск
-              </label>
-              <input
-                type="text"
-                value={filters.search || ''}
-                onChange={(e) =>
-                  setFilters({ ...filters, search: e.target.value })
-                }
-                className="input"
-                placeholder="Поиск по описанию..."
-              />
-            </div>
           </div>
         </div>
       )}
 
-      {/* Transactions List */}
-      <div className="card">
-        <div className="overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Тип
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Описание
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Сумма
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Валюта
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Дата
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Действия
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {transactions?.data?.map((transaction) => (
-                <tr key={transaction.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      {getTransactionIcon(transaction.type)}
-                      <span className="ml-2 text-sm font-medium text-gray-900">
-                        {getTransactionTypeText(transaction.type)}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-900">
-                      {transaction.description}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div
-                      className={`text-sm font-medium ${getAmountColor(transaction.type)}`}
-                    >
-                      {transaction.type === 'INCOME'
-                        ? '+'
-                        : transaction.type === 'EXPENSE'
-                          ? '-'
-                          : ''}
-                      {transaction.amount.toLocaleString('ru-RU')}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <span className="text-sm font-medium text-gray-900 mr-2">
-                        {transaction.currency.code}
-                      </span>
-                      <span className="text-sm text-gray-500">
-                        {transaction.currency.symbol}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(transaction.createdAt).toLocaleDateString(
-                      'ru-RU',
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button
-                      onClick={() => handleDelete(transaction.id)}
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      Удалить
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {transactions?.data?.length === 0 && (
+      {/* Список транзакций */}
+      <div className="bg-white shadow rounded-lg overflow-hidden">
+        {transactions.length === 0 ? (
           <div className="text-center py-12">
             <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-gray-400 text-2xl">💳</span>
@@ -302,7 +293,7 @@ export const Transactions = () => {
               Нет транзакций
             </h3>
             <p className="text-gray-500 mb-4">
-              Добавьте свою первую транзакцию для начала работы
+              Добавьте первую транзакцию для начала работы
             </p>
             <button
               onClick={() => setIsCreateModalOpen(true)}
@@ -311,16 +302,85 @@ export const Transactions = () => {
               Добавить транзакцию
             </button>
           </div>
+        ) : (
+          <ul className="divide-y divide-gray-200">
+            {transactions.map((transaction) => (
+              <li key={transaction.id} className="p-6 hover:bg-gray-50">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      {getTransactionIcon(transaction.type)}
+                    </div>
+                    <div className="ml-4">
+                      <div className="flex items-center">
+                        <p className="text-sm font-medium text-gray-900">
+                          {getTransactionLabel(transaction.type)}
+                        </p>
+                        <span className="ml-2 text-xs text-gray-500">
+                          {transaction.balance?.name}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-500">
+                        {new Date(transaction.createdAt).toLocaleDateString(
+                          'ru-RU',
+                          {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          },
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <div className="text-right">
+                      <p
+                        className={`text-sm font-semibold ${getTransactionColor(transaction.type)}`}
+                      >
+                        {transaction.type === 'EXPENSE' ? '-' : '+'}
+                        {(transaction.amount / 100).toLocaleString('ru-RU', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}{' '}
+                        {transaction.currency?.symbol}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {transaction.currency?.code}
+                      </p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => handleEdit(transaction)}
+                        className="p-2 text-gray-400 hover:text-gray-600"
+                      >
+                        <PencilIcon className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(transaction.id)}
+                        className="p-2 text-gray-400 hover:text-red-600"
+                      >
+                        <TrashIcon className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
 
-      {/* Create Modal */}
+      {/* Modal */}
       {isCreateModalOpen && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div className="mt-3">
               <h3 className="text-lg font-medium text-gray-900 mb-4">
-                Добавить транзакцию
+                {editingTransaction
+                  ? 'Редактировать транзакцию'
+                  : 'Добавить транзакцию'}
               </h3>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div>
@@ -328,19 +388,40 @@ export const Transactions = () => {
                     Тип транзакции
                   </label>
                   <select
-                    {...register('type', {
-                      required: 'Выберите тип транзакции',
-                    })}
+                    {...register('type', { required: 'Выберите тип' })}
                     className="input"
                   >
                     <option value="">Выберите тип</option>
                     <option value="INCOME">Доход</option>
                     <option value="EXPENSE">Расход</option>
                     <option value="TRANSFER">Перевод</option>
+                    <option value="SETTLEMENT">Расчет</option>
                   </select>
                   {errors.type && (
                     <p className="mt-1 text-sm text-red-600">
                       {errors.type.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Баланс
+                  </label>
+                  <select
+                    {...register('balanceId', { required: 'Выберите баланс' })}
+                    className="input"
+                  >
+                    <option value="">Выберите баланс</option>
+                    {balances.map((balance) => (
+                      <option key={balance.id} value={balance.id}>
+                        {balance.name}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.balanceId && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.balanceId.message}
                     </p>
                   )}
                 </div>
@@ -354,7 +435,7 @@ export const Transactions = () => {
                     className="input"
                   >
                     <option value="">Выберите валюту</option>
-                    {currencies?.data?.map((currency) => (
+                    {currencies.map((currency) => (
                       <option key={currency.id} value={currency.id}>
                         {currency.code} - {currency.name}
                       </option>
@@ -391,46 +472,28 @@ export const Transactions = () => {
                   )}
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Описание
-                  </label>
-                  <textarea
-                    {...register('description', {
-                      required: 'Введите описание',
-                    })}
-                    className="input"
-                    rows={3}
-                    placeholder="Описание транзакции..."
-                  />
-                  {errors.description && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {errors.description.message}
-                    </p>
-                  )}
-                </div>
-
                 <div className="flex justify-end space-x-3 pt-4">
                   <button
                     type="button"
-                    onClick={() => {
-                      setIsCreateModalOpen(false);
-                      reset();
-                    }}
+                    onClick={closeModal}
                     className="btn btn-secondary"
                   >
                     Отмена
                   </button>
                   <button
                     type="submit"
-                    disabled={createMutation.isPending}
+                    disabled={
+                      createMutation.isPending || updateMutation.isPending
+                    }
                     className="btn btn-primary"
                   >
-                    {createMutation.isPending ? (
+                    {createMutation.isPending || updateMutation.isPending ? (
                       <div className="flex items-center">
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Создание...
+                        Сохранение...
                       </div>
+                    ) : editingTransaction ? (
+                      'Обновить'
                     ) : (
                       'Создать'
                     )}

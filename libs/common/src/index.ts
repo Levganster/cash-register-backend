@@ -9,6 +9,7 @@ export * from './guards/auth.guard';
 export * from './guards/permission.guard';
 
 export * from './interceptors/logger.interceptor';
+export * from './interceptors/bigint-transform.interceptor';
 
 export * from './middlewares/logger.middleware';
 

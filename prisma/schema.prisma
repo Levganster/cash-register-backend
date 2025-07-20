@@ -94,7 +94,7 @@ model CurrencyBalance {
   id         String   @id @default(uuid())
   balanceId  String   @map("balance_id")
   currencyId String   @map("currency_id")
-  amount     Int      @default(0)
+  amount     BigInt   @default(0)
   balance    Balance  @relation(fields: [balanceId], references: [id], onDelete: Cascade)
   currency   Currency @relation(fields: [currencyId], references: [id], onDelete: Cascade)
   createdAt  DateTime @default(now()) @map("created_at")
@@ -109,7 +109,7 @@ model CurrencyBalance {
 model Transaction {
   id         String   @id @default(uuid())
   type       TransactionType
-  amount     Int
+  amount     BigInt
   balanceId  String   @map("balance_id")
   currencyId String   @map("currency_id")
   balance    Balance  @relation(fields: [balanceId], references: [id], onDelete: Cascade)

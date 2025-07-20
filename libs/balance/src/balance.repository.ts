@@ -101,6 +101,12 @@ export class BalanceRepository {
     });
   }
 
+  async count(dto: BalanceSearchDto) {
+    return this.prisma.balance.count({
+      where: mapSearch(dto.filters || {}),
+    });
+  }
+
   async existsById(id: string) {
     const result = await this.prisma.$queryRaw`
       SELECT EXISTS (

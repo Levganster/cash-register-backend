@@ -10,7 +10,8 @@ export enum TransactionType {
 
 export class TransactionBaseDto {
   @ApiProperty({
-    description: 'Тип транзакции',
+    description:
+      'Тип транзакции: INCOME - пополнение (+amount), EXPENSE - расход (-amount), TRANSFER - перевод (-amount), SETTLEMENT - установка конкретной суммы (=amount) и очистка всех доходов и предыдущих установок',
     enum: TransactionType,
     example: TransactionType.INCOME,
   })

@@ -56,20 +56,19 @@ export class CurrencyBalanceService {
   }
 
   async findByBalanceAndCurrency(balanceId: string, currencyId: string) {
-    const currencyBalance =
-      await this.currencyBalanceRepository.findByBalanceAndCurrency(
-        balanceId,
-        currencyId,
-      );
-    if (!currencyBalance) {
-      throw new NotFoundException('Баланс валюты не найден');
-    }
-
-    return currencyBalance;
+    return this.currencyBalanceRepository.findByBalanceAndCurrency(
+      balanceId,
+      currencyId,
+    );
   }
 
   async search(dto: CurrencyBalanceSearchDto) {
-    return this.currencyBalanceRepository.search(dto);
+    const data = await this.currencyBalanceRepository.search(dto);
+    const count = await this.currencyBalanceRepository.count(dto);
+    return {
+      data,
+      count,
+    };
   }
 
   async updateAmount(balanceId: string, currencyId: string, amount: number) {
@@ -77,19 +76,28 @@ export class CurrencyBalanceService {
       throw new BadRequestException('Сумма не может быть отрицательной');
     }
 
+    const bigIntAmount = BigInt(amount);
+
+    // Проверяем существование баланса и создаем если нет
     const exists =
       await this.currencyBalanceRepository.existsByBalanceAndCurrency(
         balanceId,
         currencyId,
       );
+
     if (!exists) {
-      throw new NotFoundException('Баланс валюты не найден');
+      // Создаем баланс с указанной суммой
+      return this.currencyBalanceRepository.create({
+        balanceId,
+        currencyId,
+        amount: bigIntAmount,
+      });
     }
 
     return this.currencyBalanceRepository.updateAmount(
       balanceId,
       currencyId,
-      amount,
+      bigIntAmount,
     );
   }
 
@@ -98,19 +106,28 @@ export class CurrencyBalanceService {
       throw new BadRequestException('Сумма должна быть положительной');
     }
 
+    const bigIntAmount = BigInt(amount);
+
+    // Проверяем существование баланса и создаем если нет
     const exists =
       await this.currencyBalanceRepository.existsByBalanceAndCurrency(
         balanceId,
         currencyId,
       );
+
     if (!exists) {
-      throw new NotFoundException('Баланс валюты не найден');
+      // Создаем баланс с нулевой суммой
+      await this.currencyBalanceRepository.create({
+        balanceId,
+        currencyId,
+        amount: 0n,
+      });
     }
 
     return this.currencyBalanceRepository.incrementAmount(
       balanceId,
       currencyId,
-      amount,
+      bigIntAmount,
     );
   }
 
@@ -119,23 +136,31 @@ export class CurrencyBalanceService {
       throw new BadRequestException('Сумма должна быть положительной');
     }
 
-    const currencyBalance =
+    const bigIntAmount = BigInt(amount);
+
+    let currencyBalance =
       await this.currencyBalanceRepository.findByBalanceAndCurrency(
         balanceId,
         currencyId,
       );
+
     if (!currencyBalance) {
-      throw new NotFoundException('Баланс валюты не найден');
+      // Создаем баланс с нулевой суммой
+      currencyBalance = await this.currencyBalanceRepository.create({
+        balanceId,
+        currencyId,
+        amount: 0n,
+      });
     }
 
-    if (currencyBalance.amount < amount) {
+    if (currencyBalance.amount < bigIntAmount) {
       throw new BadRequestException('Недостаточно средств');
     }
 
     return this.currencyBalanceRepository.decrementAmount(
       balanceId,
       currencyId,
-      amount,
+      bigIntAmount,
     );
   }
 }

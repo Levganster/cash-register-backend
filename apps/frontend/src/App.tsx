@@ -22,7 +22,11 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 2 * 60 * 1000, // 2 minutes - данные считаются устаревшими через 2 минуты
+      gcTime: 5 * 60 * 1000, // 5 minutes - данные хранятся в кэше 5 минут
+      refetchOnWindowFocus: true, // Обновляем при фокусе окна
+      refetchOnReconnect: true, // Обновляем при восстановлении сети
+      refetchOnMount: true, // Обновляем при монтировании компонента
     },
   },
 });

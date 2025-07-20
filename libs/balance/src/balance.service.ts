@@ -59,6 +59,11 @@ export class BalanceService {
   }
 
   async search(dto: BalanceSearchDto) {
-    return this.balanceRepository.search(dto);
+    const data = await this.balanceRepository.search(dto);
+    const count = await this.balanceRepository.count(dto);
+    return {
+      data,
+      count,
+    };
   }
 }

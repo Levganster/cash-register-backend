@@ -149,6 +149,32 @@ export interface BalanceSearchDto {
   };
 }
 
+// CurrencyBalance DTOs
+export interface CurrencyBalanceCreateDto {
+  balanceId: string;
+  currencyId: string;
+  amount: number;
+}
+
+export interface CurrencyBalanceUpdateDto {
+  amount?: number;
+}
+
+export interface CurrencyBalanceSearchDto {
+  filters?: {
+    balanceId?: string;
+    currencyId?: string;
+  };
+  sorts?: {
+    createdAt?: 'asc' | 'desc';
+    amount?: 'asc' | 'desc';
+  };
+  pagination?: {
+    page?: number;
+    count?: number;
+  };
+}
+
 // Transaction DTOs
 export interface TransactionCreateDto {
   type: 'INCOME' | 'EXPENSE' | 'TRANSFER' | 'SETTLEMENT';

@@ -59,6 +59,11 @@ export class CurrencyService {
   }
 
   async search(dto: CurrencySearchDto) {
-    return this.currencyRepository.search(dto);
+    const data = await this.currencyRepository.search(dto);
+    const count = await this.currencyRepository.count(dto);
+    return {
+      data,
+      count,
+    };
   }
 }

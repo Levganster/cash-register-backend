@@ -93,6 +93,49 @@ export class TransactionRepository {
     });
   }
 
+  async count(dto: TransactionSearchDto) {
+    const where: any = {};
+
+    if (dto.filters?.type) {
+      where.type = dto.filters.type;
+    }
+
+    if (dto.filters?.balanceId) {
+      where.balanceId = dto.filters.balanceId;
+    }
+
+    if (dto.filters?.currencyId) {
+      where.currencyId = dto.filters.currencyId;
+    }
+
+    if (dto.filters?.minAmount !== undefined) {
+      where.amount = { ...where.amount, gte: dto.filters.minAmount };
+    }
+
+    if (dto.filters?.maxAmount !== undefined) {
+      where.amount = { ...where.amount, lte: dto.filters.maxAmount };
+    }
+
+    if (dto.filters?.dateFrom) {
+      where.createdAt = {
+        ...where.createdAt,
+        gte: new Date(dto.filters.dateFrom),
+      };
+    }
+
+    if (dto.filters?.dateTo) {
+      where.createdAt = {
+        ...where.createdAt,
+        lte: new Date(dto.filters.dateTo),
+      };
+    }
+    return this.prisma.transaction.count({
+      where,
+      orderBy: mapSort(dto.sorts || { createdAt: 'desc' }),
+      ...mapPagination(dto.pagination),
+    });
+  }
+
   async existsById(id: string) {
     const result = await this.prisma.$queryRaw`
       SELECT EXISTS (
@@ -121,10 +164,11 @@ export class TransactionRepository {
     ]);
 
     return {
-      totalIncome: income._sum.amount || 0,
-      totalExpense: expense._sum.amount || 0,
+      totalIncome: Number(income._sum.amount || 0n),
+      totalExpense: Number(expense._sum.amount || 0n),
       totalTransactions: total,
-      netAmount: (income._sum.amount || 0) - (expense._sum.amount || 0),
+      netAmount:
+        Number(income._sum.amount || 0n) - Number(expense._sum.amount || 0n),
     };
   }
 
@@ -149,6 +193,26 @@ export class TransactionRepository {
       include: {
         balance: true,
         currency: true,
+      },
+    });
+  }
+
+  async deleteIncomeTransactions(balanceId: string, currencyId: string) {
+    return this.prisma.transaction.deleteMany({
+      where: {
+        balanceId,
+        currencyId,
+        type: 'INCOME',
+      },
+    });
+  }
+
+  async deleteSettlementTransactions(balanceId: string, currencyId: string) {
+    return this.prisma.transaction.deleteMany({
+      where: {
+        balanceId,
+        currencyId,
+        type: 'SETTLEMENT',
       },
     });
   }

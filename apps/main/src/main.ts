@@ -3,6 +3,7 @@ import { AppModule } from './modules/app/app.module';
 import { ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
 import { LoggerInterceptor } from '@app/common/interceptors/logger.interceptor';
+import { BigIntTransformInterceptor } from '@app/common';
 import * as cookieParser from 'cookie-parser';
 import { swaggerInit } from '@app/common/swagger/swagger';
 
@@ -13,7 +14,10 @@ async function bootstrap() {
 
   app.use(cookieParser());
   app.use(helmet());
-  app.useGlobalInterceptors(new LoggerInterceptor());
+  app.useGlobalInterceptors(
+    new LoggerInterceptor(),
+    new BigIntTransformInterceptor(),
+  );
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,

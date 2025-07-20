@@ -4,6 +4,7 @@ import type {
   Balance,
   Transaction,
   Currency,
+  CurrencyBalance,
   Role,
   Permission,
   ApiResponse,
@@ -13,6 +14,9 @@ import type {
   BalanceCreateDto,
   BalanceUpdateDto,
   BalanceSearchDto,
+  CurrencyBalanceCreateDto,
+  CurrencyBalanceUpdateDto,
+  CurrencyBalanceSearchDto,
   TransactionCreateDto,
   TransactionUpdateDto,
   TransactionSearchDto,
@@ -207,7 +211,10 @@ export const apiClient = {
 
   // Балансы (основной API)
   getBalances: (data?: BalanceSearchDto) =>
-    mainApiClient.post<ApiResponse<Balance[]>>('/balance/search', data || {}),
+    mainApiClient.post<ApiResponse<{ data: Balance[]; count: number }>>(
+      '/balance/search',
+      data || {},
+    ),
   getBalance: (id: string) =>
     mainApiClient.get<ApiResponse<Balance>>(`/balance/${id}`),
   createBalance: (data: BalanceCreateDto) =>
@@ -217,9 +224,27 @@ export const apiClient = {
   deleteBalance: (id: string) =>
     mainApiClient.delete<ApiResponse<void>>(`/balance/${id}`),
 
+  // Балансы валют (основной API)
+  getMyBalances: (data?: CurrencyBalanceSearchDto) =>
+    mainApiClient.post<ApiResponse<{ data: CurrencyBalance[]; count: number }>>(
+      '/currency-balance/search',
+      data || {},
+    ),
+  getCurrencyBalance: (id: string) =>
+    mainApiClient.get<ApiResponse<CurrencyBalance>>(`/currency-balance/${id}`),
+  createCurrencyBalance: (data: CurrencyBalanceCreateDto) =>
+    mainApiClient.post<ApiResponse<CurrencyBalance>>('/currency-balance', data),
+  updateCurrencyBalance: (id: string, data: CurrencyBalanceUpdateDto) =>
+    mainApiClient.put<ApiResponse<CurrencyBalance>>(
+      `/currency-balance/${id}`,
+      data,
+    ),
+  deleteCurrencyBalance: (id: string) =>
+    mainApiClient.delete<ApiResponse<void>>(`/currency-balance/${id}`),
+
   // Транзакции (основной API)
   getTransactions: (data?: TransactionSearchDto) =>
-    mainApiClient.post<ApiResponse<Transaction[]>>(
+    mainApiClient.post<ApiResponse<{ data: Transaction[]; count: number }>>(
       '/transaction/search',
       data || {},
     ),
@@ -238,7 +263,10 @@ export const apiClient = {
 
   // Валюты (основной API)
   getCurrencies: (data?: CurrencySearchDto) =>
-    mainApiClient.post<ApiResponse<Currency[]>>('/currency/search', data || {}),
+    mainApiClient.post<ApiResponse<{ data: Currency[]; count: number }>>(
+      '/currency/search',
+      data || {},
+    ),
   getCurrency: (id: string) =>
     mainApiClient.get<ApiResponse<Currency>>(`/currency/${id}`),
   createCurrency: (data: CurrencyCreateDto) =>

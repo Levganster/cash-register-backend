@@ -90,6 +90,30 @@ export class CurrencyBalanceRepository {
     });
   }
 
+  async count(dto: CurrencyBalanceSearchDto) {
+    const where: any = {};
+
+    if (dto.filters?.balanceId) {
+      where.balanceId = dto.filters.balanceId;
+    }
+
+    if (dto.filters?.currencyId) {
+      where.currencyId = dto.filters.currencyId;
+    }
+
+    if (dto.filters?.minAmount !== undefined) {
+      where.amount = { ...where.amount, gte: dto.filters.minAmount };
+    }
+
+    if (dto.filters?.maxAmount !== undefined) {
+      where.amount = { ...where.amount, lte: dto.filters.maxAmount };
+    }
+
+    return this.prisma.currencyBalance.count({
+      where,
+    });
+  }
+
   async existsById(id: string) {
     const result = await this.prisma.$queryRaw`
       SELECT EXISTS (
@@ -126,7 +150,7 @@ export class CurrencyBalanceRepository {
     return Boolean(result);
   }
 
-  async updateAmount(balanceId: string, currencyId: string, amount: number) {
+  async updateAmount(balanceId: string, currencyId: string, amount: bigint) {
     return this.prisma.currencyBalance.update({
       where: {
         balanceId_currencyId: {
@@ -142,7 +166,7 @@ export class CurrencyBalanceRepository {
     });
   }
 
-  async incrementAmount(balanceId: string, currencyId: string, amount: number) {
+  async incrementAmount(balanceId: string, currencyId: string, amount: bigint) {
     return this.prisma.currencyBalance.update({
       where: {
         balanceId_currencyId: {
@@ -162,7 +186,7 @@ export class CurrencyBalanceRepository {
     });
   }
 
-  async decrementAmount(balanceId: string, currencyId: string, amount: number) {
+  async decrementAmount(balanceId: string, currencyId: string, amount: bigint) {
     return this.prisma.currencyBalance.update({
       where: {
         balanceId_currencyId: {

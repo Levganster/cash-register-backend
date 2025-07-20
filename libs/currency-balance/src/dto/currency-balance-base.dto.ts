@@ -23,5 +23,5 @@ export class CurrencyBalanceBaseDto {
   })
   @IsInt()
   @Min(0)
-  amount: number;
+  amount: number | bigint;
 }

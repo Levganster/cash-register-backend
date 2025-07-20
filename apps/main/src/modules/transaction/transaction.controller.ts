@@ -69,55 +69,6 @@ export class TransactionController {
     return this.transactionService.getBalanceStatistics(balanceId, currencyId);
   }
 
-  @Post('income')
-  @HasPermissions(PermissionEnum.TransactionCreate)
-  @ApiOperation({ summary: 'Создать транзакцию пополнения' })
-  @ApiResponse({ status: 201, description: 'Транзакция пополнения создана' })
-  async createIncome(
-    @Body() dto: { balanceId: string; currencyId: string; amount: number },
-  ) {
-    return this.transactionService.createIncome(
-      dto.balanceId,
-      dto.currencyId,
-      dto.amount,
-    );
-  }
-
-  @Post('expense')
-  @HasPermissions(PermissionEnum.TransactionCreate)
-  @ApiOperation({ summary: 'Создать транзакцию расхода' })
-  @ApiResponse({ status: 201, description: 'Транзакция расхода создана' })
-  async createExpense(
-    @Body() dto: { balanceId: string; currencyId: string; amount: number },
-  ) {
-    return this.transactionService.createExpense(
-      dto.balanceId,
-      dto.currencyId,
-      dto.amount,
-    );
-  }
-
-  @Post('transfer')
-  @HasPermissions(PermissionEnum.TransactionCreate)
-  @ApiOperation({ summary: 'Создать транзакцию перевода' })
-  @ApiResponse({ status: 201, description: 'Транзакция перевода создана' })
-  async createTransfer(
-    @Body()
-    dto: {
-      fromBalanceId: string;
-      toBalanceId: string;
-      currencyId: string;
-      amount: number;
-    },
-  ) {
-    return this.transactionService.createTransfer(
-      dto.fromBalanceId,
-      dto.toBalanceId,
-      dto.currencyId,
-      dto.amount,
-    );
-  }
-
   @Put(':id')
   @HasPermissions(PermissionEnum.TransactionUpdate)
   @ApiOperation({ summary: 'Обновить транзакцию' })

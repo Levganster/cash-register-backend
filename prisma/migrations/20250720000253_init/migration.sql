@@ -81,7 +81,7 @@ CREATE TABLE "currency_balances" (
     "id" TEXT NOT NULL,
     "balance_id" TEXT NOT NULL,
     "currency_id" TEXT NOT NULL,
-    "amount" INTEGER NOT NULL DEFAULT 0,
+    "amount" BIGINT NOT NULL DEFAULT 0,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -92,7 +92,7 @@ CREATE TABLE "currency_balances" (
 CREATE TABLE "transactions" (
     "id" TEXT NOT NULL,
     "type" "TransactionType" NOT NULL,
-    "amount" INTEGER NOT NULL,
+    "amount" BIGINT NOT NULL,
     "balance_id" TEXT NOT NULL,
     "currency_id" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
