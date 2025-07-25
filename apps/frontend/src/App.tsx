@@ -15,6 +15,7 @@ import { Layout } from './components/layout/Layout';
 import { Dashboard } from './pages/Dashboard';
 import { Balances } from './pages/Balances';
 import { Transactions } from './pages/Transactions';
+import { Currencies } from './pages/Currencies';
 import { AdminUsers } from './pages/admin/Users';
 import { useAuthStore } from './store/authStore';
 
@@ -69,6 +70,7 @@ function App() {
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="balances" element={<Balances />} />
               <Route path="transactions" element={<Transactions />} />
+              <Route path="currencies" element={<Currencies />} />
               <Route path="admin">
                 <Route path="users" element={<AdminUsers />} />
               </Route>

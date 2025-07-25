@@ -195,10 +195,9 @@ export const Transactions = () => {
     <div className="space-y-6">
       <div className="sm:flex sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Транзакции</h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Управляйте доходами и расходами
-          </p>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Управление транзакциями
+          </h1>
         </div>
         <div className="flex space-x-3">
           <button

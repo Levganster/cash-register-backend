@@ -249,17 +249,6 @@ export const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-      <div className="sm:flex sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Добро пожаловать, {user?.tgId}!
-          </h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Обзор ваших финансов и последних транзакций
-          </p>
-        </div>
-      </div>
-
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         <div className="card">
           <div className="flex items-center">

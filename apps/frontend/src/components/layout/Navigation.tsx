@@ -6,15 +6,15 @@ import { useAuthStore } from '../../store/authStore';
 import { clsx } from 'clsx';
 
 const navigation = [
-  { name: 'Дашборд', href: '/dashboard', icon: '📊' },
-  { name: 'Балансы', href: '/balances', icon: '💰' },
-  { name: 'Транзакции', href: '/transactions', icon: '💳' },
-  { name: 'Валюты', href: '/currencies', icon: '💱' },
+  { name: 'Дашборд', href: '/dashboard' },
+  { name: 'Балансы', href: '/balances' },
+  { name: 'Транзакции', href: '/transactions' },
+  { name: 'Валюты', href: '/currencies' },
 ];
 
 const adminNavigation = [
-  { name: 'Пользователи', href: '/admin/users', icon: '👥' },
-  { name: 'Роли', href: '/admin/roles', icon: '🔐' },
+  { name: 'Пользователи', href: '/admin/users' },
+  { name: 'Роли', href: '/admin/roles' },
 ];
 
 export const Navigation = () => {
@@ -41,7 +41,7 @@ export const Navigation = () => {
                     to="/dashboard"
                     className="text-xl font-bold text-primary-600"
                   >
-                    💰 Cash Register
+                    <img src="/logo.png" alt="Cash Register" className="h-8" />
                   </Link>
                 </div>
                 <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
@@ -56,7 +56,6 @@ export const Navigation = () => {
                         'inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium',
                       )}
                     >
-                      <span className="mr-2">{item.icon}</span>
                       {item.name}
                     </Link>
                   ))}
@@ -74,7 +73,6 @@ export const Navigation = () => {
                             'inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium',
                           )}
                         >
-                          <span className="mr-2">{item.icon}</span>
                           {item.name}
                         </Link>
                       ))}
@@ -164,7 +162,6 @@ export const Navigation = () => {
                     'block border-l-4 py-2 pl-3 pr-4 text-base font-medium',
                   )}
                 >
-                  <span className="mr-2">{item.icon}</span>
                   {item.name}
                 </Disclosure.Button>
               ))}
@@ -183,7 +180,6 @@ export const Navigation = () => {
                         'block border-l-4 py-2 pl-3 pr-4 text-base font-medium',
                       )}
                     >
-                      <span className="mr-2">{item.icon}</span>
                       {item.name}
                     </Disclosure.Button>
                   ))}
