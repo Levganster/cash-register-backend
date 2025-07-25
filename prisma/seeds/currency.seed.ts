@@ -5,21 +5,25 @@ export async function seedCurrency(prisma: PrismaClient) {
     {
       code: 'USD',
       name: 'Доллар США',
+      rate: 85.5,
       symbol: '$',
     },
     {
       code: 'EUR',
       name: 'Евро',
+      rate: 95.5,
       symbol: '€',
     },
     {
       code: 'RUB',
       name: 'Российский рубль',
+      rate: 1,
       symbol: '₽',
     },
     {
       code: 'KZT',
       name: 'Казахстанский тенге',
+      rate: 0.18,
       symbol: '₸',
     },
   ];

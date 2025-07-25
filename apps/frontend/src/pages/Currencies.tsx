@@ -25,6 +25,7 @@ interface CurrencyFormData {
   code: string;
   name: string;
   symbol: string;
+  rate: number;
 }
 
 export const Currencies = () => {
@@ -79,7 +80,11 @@ export const Currencies = () => {
     reset,
     setValue,
     formState: { errors },
-  } = useForm<CurrencyFormData>();
+  } = useForm<CurrencyFormData>({
+    defaultValues: {
+      rate: 1,
+    },
+  });
 
   const onSubmit = (data: CurrencyFormData) => {
     if (editingCurrency) {
@@ -94,6 +99,7 @@ export const Currencies = () => {
     setValue('code', currency.code);
     setValue('name', currency.name);
     setValue('symbol', currency.symbol);
+    setValue('rate', currency.rate || 1);
     setIsEditModalOpen(true);
   };
 
@@ -215,6 +221,10 @@ export const Currencies = () => {
                   <span className="text-gray-600">Символ:</span>
                   <span className="font-medium text-lg">{currency.symbol}</span>
                 </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Курс к рублю:</span>
+                  <span className="font-medium">{currency.rate || 1}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -331,6 +341,32 @@ export const Currencies = () => {
                   {errors.symbol && (
                     <p className="mt-1 text-sm text-red-600">
                       {errors.symbol.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Курс к рублю
+                  </label>
+                  <input
+                    type="number"
+                    step="0.0001"
+                    min="0.0001"
+                    {...register('rate', {
+                      required: 'Введите курс валюты',
+                      min: {
+                        value: 0.0001,
+                        message: 'Курс должен быть больше 0',
+                      },
+                      valueAsNumber: true,
+                    })}
+                    className="input"
+                    placeholder="Например: 75.5 (для USD), 1.0 (для RUB)"
+                  />
+                  {errors.rate && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.rate.message}
                     </p>
                   )}
                 </div>

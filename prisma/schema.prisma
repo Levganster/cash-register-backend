@@ -82,6 +82,7 @@ model Currency {
   code      String   @unique
   name      String
   symbol    String
+  rate      Float    @default(1.0)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
   currencyBalances CurrencyBalance[]

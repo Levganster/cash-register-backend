@@ -58,6 +58,7 @@ export interface Currency {
   code: string;
   name: string;
   symbol: string;
+  rate: number;
   createdAt: string;
   updatedAt: string;
   currencyBalances?: CurrencyBalance[];
@@ -211,12 +212,14 @@ export interface CurrencyCreateDto {
   code: string;
   name: string;
   symbol: string;
+  rate: number;
 }
 
 export interface CurrencyUpdateDto {
   code?: string;
   name?: string;
   symbol?: string;
+  rate?: number;
 }
 
 export interface CurrencySearchDto {

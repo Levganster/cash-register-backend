@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, MaxLength, MinLength } from 'class-validator';
+import {
+  IsString,
+  MaxLength,
+  MinLength,
+  IsNumber,
+  IsPositive,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CurrencyBaseDto {
   @ApiProperty({
@@ -34,4 +41,14 @@ export class CurrencyBaseDto {
   @MinLength(1)
   @MaxLength(5)
   symbol: string;
+
+  @ApiProperty({
+    description: 'Курс валюты к рублю',
+    example: 75.5,
+    minimum: 0.0001,
+  })
+  @IsNumber()
+  @IsPositive()
+  @Type(() => Number)
+  rate: number;
 }

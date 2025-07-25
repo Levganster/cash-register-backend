@@ -58,6 +58,7 @@ export const Dashboard = () => {
           name: cb.currency?.code || cb.currencyCode || 'Unknown',
           value: (cb.amount || 0) / 100,
           symbol: cb.currency?.symbol || cb.currencySymbol || '',
+          rate: cb.currency?.rate || 1,
         }));
       }
 
@@ -68,6 +69,7 @@ export const Dashboard = () => {
             name: balance.currency.code || balance.currencyCode || 'Unknown',
             value: (balance.amount || 0) / 100,
             symbol: balance.currency.symbol || balance.currencySymbol || '',
+            rate: balance.currency.rate || 1,
           },
         ];
       }
@@ -79,6 +81,7 @@ export const Dashboard = () => {
             name: balance.name || 'Balance',
             value: (balance.amount || 0) / 100,
             symbol: '',
+            rate: 1,
           },
         ];
       }
@@ -87,22 +90,35 @@ export const Dashboard = () => {
     })
     .filter((item: any) => item.value > 0); // Показываем только ненулевые балансы
 
-  // Объединяем одинаковые валюты
+  // Объединяем одинаковые валюты и конвертируем в рубли
   const currencyMap = new Map<
     string,
-    { name: string; value: number; symbol: string }
+    {
+      name: string;
+      value: number;
+      symbol: string;
+      rate: number;
+      valueInRub: number;
+      originalValue: number;
+    }
   >();
 
   flatBalances.forEach((item: any) => {
     const key = item.name; // Группируем по коду валюты
+    const valueInRub = item.value * (item.rate || 1); // Конвертируем в рубли
+
     if (currencyMap.has(key)) {
       const existing = currencyMap.get(key)!;
-      existing.value += item.value; // Суммируем балансы
+      existing.originalValue += item.value; // Суммируем балансы в оригинальной валюте
+      existing.valueInRub += valueInRub; // Суммируем балансы в рублях
     } else {
       currencyMap.set(key, {
         name: item.name,
         value: item.value,
         symbol: item.symbol,
+        rate: item.rate || 1,
+        valueInRub: valueInRub,
+        originalValue: item.value,
       });
     }
   });
@@ -116,17 +132,19 @@ export const Dashboard = () => {
   transactionsList.forEach((t: any) => {
     const type = t.type || t.transactionType || t.kind;
     const amount = (t.amount || 0) / 100;
+    const rate = t.currency?.rate || t.currencyRate || 1;
+    const amountInRub = amount * rate;
 
     if (type === 'SETTLEMENT') {
       if (amount > 0) {
-        totalIncome += amount;
+        totalIncome += amountInRub;
       } else if (amount < 0) {
-        totalExpenses += Math.abs(amount);
+        totalExpenses += Math.abs(amountInRub);
       }
     } else if (type === 'INCOME' || type === 'income' || type === 'IN') {
-      totalIncome += amount;
+      totalIncome += amountInRub;
     } else if (type === 'EXPENSE' || type === 'expense' || type === 'OUT') {
-      totalExpenses += amount;
+      totalExpenses += amountInRub;
     }
   });
 
@@ -203,26 +221,28 @@ export const Dashboard = () => {
       const transactionType =
         transaction.type || transaction.transactionType || transaction.kind;
       const amount = (transaction.amount || 0) / 100;
+      const rate = transaction.currency?.rate || transaction.currencyRate || 1;
+      const amountInRub = amount * rate;
 
       // Для SETTLEMENT транзакций определяем тип по сумме
       if (transactionType === 'SETTLEMENT') {
         if (amount > 0) {
-          acc[groupKey].income += amount;
+          acc[groupKey].income += amountInRub;
         } else if (amount < 0) {
-          acc[groupKey].expense += Math.abs(amount);
+          acc[groupKey].expense += Math.abs(amountInRub);
         }
       } else if (
         transactionType === 'INCOME' ||
         transactionType === 'income' ||
         transactionType === 'IN'
       ) {
-        acc[groupKey].income += amount;
+        acc[groupKey].income += amountInRub;
       } else if (
         transactionType === 'EXPENSE' ||
         transactionType === 'expense' ||
         transactionType === 'OUT'
       ) {
-        acc[groupKey].expense += amount;
+        acc[groupKey].expense += amountInRub;
       }
 
       return acc;
@@ -286,7 +306,7 @@ export const Dashboard = () => {
                 </dt>
                 <dd className="text-lg font-medium text-gray-900">
                   {balanceChartData
-                    .reduce((sum, item) => sum + item.value, 0)
+                    .reduce((sum, item) => sum + item.valueInRub, 0)
                     .toLocaleString('ru-RU')}{' '}
                   ₽
                 </dd>
@@ -402,14 +422,14 @@ export const Dashboard = () => {
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ name, value, symbol }) =>
-                  `${name}: ${value?.toLocaleString('ru-RU') || 0} ${symbol}`
+                label={({ name, symbol, valueInRub, originalValue }) =>
+                  `${name}: ${originalValue?.toLocaleString('ru-RU') || 0} ${symbol} (${valueInRub?.toLocaleString('ru-RU') || 0} ₽)`
                 }
                 isAnimationActive={true}
                 animationEasing="ease-out"
                 outerRadius={80}
                 fill="#8884d8"
-                dataKey="value"
+                dataKey="valueInRub"
                 animationBegin={0}
                 animationDuration={400}
               >
