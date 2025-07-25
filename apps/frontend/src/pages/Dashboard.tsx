@@ -50,7 +50,7 @@ export const Dashboard = () => {
       : [];
 
   // Пробуем разные варианты структуры данных
-  const balanceChartData = balancesList
+  const flatBalances = balancesList
     .flatMap((balance: any) => {
       // Вариант 1: balance.currencyBalances (как ожидалось)
       if (balance.currencyBalances && Array.isArray(balance.currencyBalances)) {
@@ -86,6 +86,28 @@ export const Dashboard = () => {
       return [];
     })
     .filter((item: any) => item.value > 0); // Показываем только ненулевые балансы
+
+  // Объединяем одинаковые валюты
+  const currencyMap = new Map<
+    string,
+    { name: string; value: number; symbol: string }
+  >();
+
+  flatBalances.forEach((item: any) => {
+    const key = item.name; // Группируем по коду валюты
+    if (currencyMap.has(key)) {
+      const existing = currencyMap.get(key)!;
+      existing.value += item.value; // Суммируем балансы
+    } else {
+      currencyMap.set(key, {
+        name: item.name,
+        value: item.value,
+        symbol: item.symbol,
+      });
+    }
+  });
+
+  const balanceChartData = Array.from(currencyMap.values());
 
   // Вычисляем статистику из транзакций
   let totalIncome = 0;

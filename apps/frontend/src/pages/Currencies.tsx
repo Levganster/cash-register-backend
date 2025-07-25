@@ -29,6 +29,7 @@ interface CurrencyFormData {
 
 export const Currencies = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingCurrency, setEditingCurrency] = useState<Currency | null>(null);
   const queryClient = useQueryClient();
 
@@ -58,6 +59,7 @@ export const Currencies = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['currencies'] });
       queryClient.invalidateQueries({ queryKey: ['my-balances'] });
+      setIsEditModalOpen(false);
       setEditingCurrency(null);
       reset();
     },
@@ -92,7 +94,7 @@ export const Currencies = () => {
     setValue('code', currency.code);
     setValue('name', currency.name);
     setValue('symbol', currency.symbol);
-    setIsCreateModalOpen(true);
+    setIsEditModalOpen(true);
   };
 
   const handleDelete = (id: string) => {
@@ -103,6 +105,7 @@ export const Currencies = () => {
 
   const closeModal = () => {
     setIsCreateModalOpen(false);
+    setIsEditModalOpen(false);
     setEditingCurrency(null);
     reset();
   };
@@ -238,12 +241,12 @@ export const Currencies = () => {
       )}
 
       {/* Модальное окно */}
-      {isCreateModalOpen && (
+      {(isCreateModalOpen || isEditModalOpen) && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div className="mt-3">
               <h3 className="text-lg font-medium text-gray-900 mb-4">
-                {editingCurrency ? 'Редактировать валюту' : 'Добавить валюту'}
+                {isEditModalOpen ? 'Редактировать валюту' : 'Добавить валюту'}
               </h3>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div>
@@ -355,7 +358,7 @@ export const Currencies = () => {
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                         Сохранение...
                       </div>
-                    ) : editingCurrency ? (
+                    ) : isEditModalOpen ? (
                       'Обновить'
                     ) : (
                       'Создать'
