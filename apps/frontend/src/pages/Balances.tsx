@@ -6,6 +6,7 @@ import {
   PencilIcon,
   TrashIcon,
   XMarkIcon,
+  ArrowPathIcon,
 } from '@heroicons/react/24/outline';
 import { apiClient } from '../lib/api';
 import type { Balance, Currency } from '../types';
@@ -199,6 +200,19 @@ export const Balances = () => {
     },
   });
 
+  const resetMutation = useMutation({
+    mutationFn: (id: string) => apiClient.resetBalance(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['balances'] });
+      queryClient.invalidateQueries({ queryKey: ['my-balances'] });
+      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      alert('Баланс успешно сброшен! Все транзакции удалены, сумма обнулена.');
+    },
+    onError: (error: any) => {
+      alert(`Ошибка при сбросе баланса: ${error.response?.data?.message || error.message}`);
+    },
+  });
+
   const {
     register,
     handleSubmit,
@@ -275,6 +289,12 @@ export const Balances = () => {
   const handleDelete = (id: string) => {
     if (confirm('Вы уверены, что хотите удалить этот баланс?')) {
       deleteMutation.mutate(id);
+    }
+  };
+
+  const handleReset = (id: string, name: string) => {
+    if (confirm(`Вы уверены, что хотите сбросить баланс "${name}"? Это удалит все транзакции и обнулит сумму!`)) {
+      resetMutation.mutate(id);
     }
   };
 
@@ -379,6 +399,14 @@ export const Balances = () => {
                   title="Редактировать"
                 >
                   <PencilIcon className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => handleReset(balance.id, balance.name)}
+                  className="p-2 text-gray-400 hover:text-yellow-600 transition-colors"
+                  title="Сбросить баланс (удалить все транзакции и обнулить сумму)"
+                  disabled={resetMutation.isPending}
+                >
+                  <ArrowPathIcon className={`h-4 w-4 ${resetMutation.isPending ? 'animate-spin' : ''}`} />
                 </button>
                 <button
                   onClick={() => handleDelete(balance.id)}

@@ -197,23 +197,5 @@ export class TransactionRepository {
     });
   }
 
-  async deleteIncomeTransactions(balanceId: string, currencyId: string) {
-    return this.prisma.transaction.deleteMany({
-      where: {
-        balanceId,
-        currencyId,
-        type: 'INCOME',
-      },
-    });
-  }
 
-  async deleteSettlementTransactions(balanceId: string, currencyId: string) {
-    return this.prisma.transaction.deleteMany({
-      where: {
-        balanceId,
-        currencyId,
-        type: 'SETTLEMENT',
-      },
-    });
-  }
 }

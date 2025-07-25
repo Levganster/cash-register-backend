@@ -14,14 +14,14 @@ import { apiClient } from '../lib/api';
 import type { Transaction, Currency, Balance } from '../types';
 
 interface TransactionFormData {
-  type: 'INCOME' | 'EXPENSE' | 'TRANSFER' | 'SETTLEMENT';
+  type: 'INCOME' | 'EXPENSE' | 'TRANSFER';
   amount: number;
   balanceId: string;
   currencyId: string;
 }
 
 interface FilterState {
-  type?: 'INCOME' | 'EXPENSE' | 'TRANSFER' | 'SETTLEMENT';
+  type?: 'INCOME' | 'EXPENSE' | 'TRANSFER';
   balanceId?: string;
   currencyId?: string;
 }
@@ -141,8 +141,6 @@ export const Transactions = () => {
         return <ArrowUpIcon className="h-5 w-5 text-red-600" />;
       case 'TRANSFER':
         return <ArrowRightIcon className="h-5 w-5 text-blue-600" />;
-      case 'SETTLEMENT':
-        return <ArrowRightIcon className="h-5 w-5 text-purple-600" />;
       default:
         return <ArrowRightIcon className="h-5 w-5 text-gray-600" />;
     }
@@ -156,8 +154,6 @@ export const Transactions = () => {
         return 'text-red-600';
       case 'TRANSFER':
         return 'text-blue-600';
-      case 'SETTLEMENT':
-        return 'text-purple-600';
       default:
         return 'text-gray-600';
     }
@@ -171,8 +167,6 @@ export const Transactions = () => {
         return 'Расход';
       case 'TRANSFER':
         return 'Перевод';
-      case 'SETTLEMENT':
-        return 'Расчет';
       default:
         return type;
     }
@@ -236,7 +230,6 @@ export const Transactions = () => {
                 <option value="INCOME">Доход</option>
                 <option value="EXPENSE">Расход</option>
                 <option value="TRANSFER">Перевод</option>
-                <option value="SETTLEMENT">Расчет</option>
               </select>
             </div>
             <div>
@@ -394,7 +387,6 @@ export const Transactions = () => {
                     <option value="INCOME">Доход</option>
                     <option value="EXPENSE">Расход</option>
                     <option value="TRANSFER">Перевод</option>
-                    <option value="SETTLEMENT">Расчет</option>
                   </select>
                   {errors.type && (
                     <p className="mt-1 text-sm text-red-600">

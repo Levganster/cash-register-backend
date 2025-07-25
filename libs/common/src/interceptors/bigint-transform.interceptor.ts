@@ -33,7 +33,7 @@ export class BigIntTransformInterceptor implements NestInterceptor {
     if (typeof obj === 'object') {
       const transformed: any = {};
       for (const key in obj) {
-        if (obj.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
           transformed[key] = this.transformBigInt(obj[key]);
         }
       }

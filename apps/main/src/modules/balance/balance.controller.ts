@@ -65,4 +65,12 @@ export class BalanceController {
   async delete(@Param('id') id: string) {
     return this.balanceService.delete(id);
   }
+
+  @Post(':id/reset')
+  @HasPermissions(PermissionEnum.BalanceUpdate)
+  @ApiOperation({ summary: 'Сбросить баланс (удалить все транзакции и обнулить сумму)' })
+  @ApiResponse({ status: 200, description: 'Баланс сброшен' })
+  async reset(@Param('id') id: string) {
+    return this.balanceService.reset(id);
+  }
 }

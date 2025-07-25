@@ -40,16 +40,6 @@ export class TransactionService {
         dto.currencyId,
         dto.amount,
       );
-    } else if (dto.type === TransactionType.SETTLEMENT) {
-      // При SETTLEMENT удаляем все доходы (INCOME) и предыдущие SETTLEMENT
-      await this.clearIncomeTransactions(dto.balanceId, dto.currencyId);
-      await this.clearSettlementTransactions(dto.balanceId, dto.currencyId);
-
-      await this.currencyBalanceService.updateAmount(
-        dto.balanceId,
-        dto.currencyId,
-        dto.amount,
-      );
     }
 
     return transaction;
@@ -84,9 +74,6 @@ export class TransactionService {
         oldTransaction.currencyId,
         Number(oldTransaction.amount),
       );
-    } else if (oldTransaction.type === TransactionType.SETTLEMENT) {
-      // Для SETTLEMENT откат невозможен без знания предыдущего состояния
-      // Пропускаем откат, новое значение установится в следующем шаге
     }
 
     // Обновляем транзакцию
@@ -105,12 +92,6 @@ export class TransactionService {
       finalTransaction.type === TransactionType.TRANSFER
     ) {
       await this.currencyBalanceService.decrementAmount(
-        finalTransaction.balanceId,
-        finalTransaction.currencyId,
-        Number(finalTransaction.amount),
-      );
-    } else if (finalTransaction.type === TransactionType.SETTLEMENT) {
-      await this.currencyBalanceService.updateAmount(
         finalTransaction.balanceId,
         finalTransaction.currencyId,
         Number(finalTransaction.amount),
@@ -145,10 +126,6 @@ export class TransactionService {
         transaction.currencyId,
         Number(transaction.amount),
       );
-    } else if (transaction.type === TransactionType.SETTLEMENT) {
-      // Для SETTLEMENT откат невозможен без знания предыдущего состояния
-      // При удалении SETTLEMENT транзакции баланс остается в текущем состоянии
-      // Это поведение можно изменить в зависимости от бизнес-логики
     }
 
     return this.transactionRepository.delete(id);
@@ -209,20 +186,5 @@ export class TransactionService {
     );
   }
 
-  private async clearIncomeTransactions(balanceId: string, currencyId: string) {
-    return this.transactionRepository.deleteIncomeTransactions(
-      balanceId,
-      currencyId,
-    );
-  }
 
-  private async clearSettlementTransactions(
-    balanceId: string,
-    currencyId: string,
-  ) {
-    return this.transactionRepository.deleteSettlementTransactions(
-      balanceId,
-      currencyId,
-    );
-  }
 }

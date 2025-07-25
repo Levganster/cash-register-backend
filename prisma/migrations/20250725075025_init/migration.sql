@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "TransactionType" AS ENUM ('INCOME', 'EXPENSE', 'TRANSFER', 'SETTLEMENT');
+CREATE TYPE "TransactionType" AS ENUM ('INCOME', 'EXPENSE', 'TRANSFER');
 
 -- CreateTable
 CREATE TABLE "users" (

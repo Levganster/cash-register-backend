@@ -66,4 +66,13 @@ export class BalanceService {
       count,
     };
   }
+
+  async reset(id: string) {
+    const exists = await this.balanceRepository.existsById(id);
+    if (!exists) {
+      throw new NotFoundException('Баланс не найден');
+    }
+
+    return this.balanceRepository.reset(id);
+  }
 }

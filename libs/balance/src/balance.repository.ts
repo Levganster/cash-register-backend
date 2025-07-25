@@ -126,4 +126,37 @@ export class BalanceRepository {
 
     return Boolean(result);
   }
+
+  async reset(id: string) {
+    return this.prisma.$transaction(async (tx) => {
+      await tx.transaction.deleteMany({
+        where: { balanceId: id },
+      });
+
+      await tx.currencyBalance.updateMany({
+        where: { balanceId: id },
+        data: { amount: 0 },
+      });
+
+      return tx.balance.findUnique({
+        where: { id },
+        include: {
+          currencyBalances: {
+            include: {
+              currency: true,
+            },
+          },
+          transactions: {
+            include: {
+              currency: true,
+            },
+            orderBy: {
+              createdAt: 'desc',
+            },
+            take: 10,
+          },
+        },
+      });
+    });
+  }
 }

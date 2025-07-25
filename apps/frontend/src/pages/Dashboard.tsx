@@ -135,13 +135,7 @@ export const Dashboard = () => {
     const rate = t.currency?.rate || t.currencyRate || 1;
     const amountInRub = amount * rate;
 
-    if (type === 'SETTLEMENT') {
-      if (amount > 0) {
-        totalIncome += amountInRub;
-      } else if (amount < 0) {
-        totalExpenses += Math.abs(amountInRub);
-      }
-    } else if (type === 'INCOME' || type === 'income' || type === 'IN') {
+    if (type === 'INCOME' || type === 'income' || type === 'IN') {
       totalIncome += amountInRub;
     } else if (type === 'EXPENSE' || type === 'expense' || type === 'OUT') {
       totalExpenses += amountInRub;
@@ -150,9 +144,7 @@ export const Dashboard = () => {
 
   const incomeTransactions = transactionsList.filter((t: any) => {
     const type = t.type || t.transactionType || t.kind;
-    const amount = t.amount || 0;
     return (
-      (type === 'SETTLEMENT' && amount > 0) ||
       type === 'INCOME' ||
       type === 'income' ||
       type === 'IN'
@@ -161,9 +153,7 @@ export const Dashboard = () => {
 
   const expenseTransactions = transactionsList.filter((t: any) => {
     const type = t.type || t.transactionType || t.kind;
-    const amount = t.amount || 0;
     return (
-      (type === 'SETTLEMENT' && amount < 0) ||
       type === 'EXPENSE' ||
       type === 'expense' ||
       type === 'OUT'
@@ -224,14 +214,7 @@ export const Dashboard = () => {
       const rate = transaction.currency?.rate || transaction.currencyRate || 1;
       const amountInRub = amount * rate;
 
-      // Для SETTLEMENT транзакций определяем тип по сумме
-      if (transactionType === 'SETTLEMENT') {
-        if (amount > 0) {
-          acc[groupKey].income += amountInRub;
-        } else if (amount < 0) {
-          acc[groupKey].expense += Math.abs(amountInRub);
-        }
-      } else if (
+      if (
         transactionType === 'INCOME' ||
         transactionType === 'income' ||
         transactionType === 'IN'

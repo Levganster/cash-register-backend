@@ -223,6 +223,8 @@ export const apiClient = {
     mainApiClient.put<ApiResponse<Balance>>(`/balance/${id}`, data),
   deleteBalance: (id: string) =>
     mainApiClient.delete<ApiResponse<void>>(`/balance/${id}`),
+  resetBalance: (id: string) =>
+    mainApiClient.post<ApiResponse<Balance>>(`/balance/${id}/reset`),
 
   // Балансы валют (основной API)
   getMyBalances: (data?: CurrencyBalanceSearchDto) =>

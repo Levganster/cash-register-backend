@@ -78,7 +78,7 @@ export interface CurrencyBalance {
 
 export interface Transaction {
   id: string;
-  type: 'INCOME' | 'EXPENSE' | 'TRANSFER' | 'SETTLEMENT';
+  type: 'INCOME' | 'EXPENSE' | 'TRANSFER';
   amount: number;
   balanceId: string;
   currencyId: string;
@@ -178,14 +178,14 @@ export interface CurrencyBalanceSearchDto {
 
 // Transaction DTOs
 export interface TransactionCreateDto {
-  type: 'INCOME' | 'EXPENSE' | 'TRANSFER' | 'SETTLEMENT';
+  type: 'INCOME' | 'EXPENSE' | 'TRANSFER';
   amount: number;
   balanceId: string;
   currencyId: string;
 }
 
 export interface TransactionUpdateDto {
-  type?: 'INCOME' | 'EXPENSE' | 'TRANSFER' | 'SETTLEMENT';
+  type?: 'INCOME' | 'EXPENSE' | 'TRANSFER';
   amount?: number;
   balanceId?: string;
   currencyId?: string;
@@ -193,7 +193,7 @@ export interface TransactionUpdateDto {
 
 export interface TransactionSearchDto {
   filters?: {
-    type?: 'INCOME' | 'EXPENSE' | 'TRANSFER' | 'SETTLEMENT';
+    type?: 'INCOME' | 'EXPENSE' | 'TRANSFER';
     balanceId?: string;
     currencyId?: string;
   };
